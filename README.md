@@ -1,22 +1,55 @@
+# Build
+
+* Stable: [![Build Status](https://api.travis-ci.org/squix78/esp8266-weather-station.svg?branch=master)](https://travis-ci.org/squix78/esp8266-weather-station)
+* Development: [![Build Status](https://api.travis-ci.org/squix78/esp8266-weather-station.svg?branch=development)](https://travis-ci.org/squix78/esp8266-weather-station)
+
 # esp8266-weather-station
+This code works best with the NodeMCU V1, 0.96" OLED display.
+Since it is sometimes complicated to find the right parts I created a kit which contains all the parts including the connector PCB:
+https://blog.squix.org/product/weatherstation-kit-w-white-oled
+By buying the kit from me you are supporting future development. Thank you!
 
-New version of the ESP8266 Weather Station
+[![Squix ESP8266 WeatherStation Classic Kit](https://blog.squix.org/wp-content/uploads/2016/12/Components4-300x300.jpg)](https://blog.squix.org/product/weatherstation-kit-w-white-oled)
 
-## Setup
 
-* Download this project either with a git checkout or press "Download as zip"
-* Install the following librarys with your Arduino Library Manager in Sketch > Include Library > Manage Libraries...
+## Arduino IDE
+
+Make sure you use a version of the Arduino IDE which is supported by the ESP8266 platform. You can find it here: https://www.arduino.cc/en/Main/OldSoftwareReleases
+
+## Setup Arduino IDE
+
+* Install the following libraries with your Arduino Library Manager in Sketch > Include Library > Manage Libraries...
+
+ * ESP8266 Weather Station
  * Json Streaming Parser (by Daniel Eichhorn)
- * ESP8266 Oled Driver for SSD1306 display (by me as well)
+ * ESP8266 Oled Driver for SSD1306 display (by me as well). **Make sure that you use Version 3.0.0 or bigger!**
 * Go to http://wunderground.com, create an account and get an API Key
-* Open the sketch in the Arduino Include and
+* In the Arduino IDE go to File > Examples > ESP8266 Weather Station
  * Enter  the Wunderground API Key
  * Enter your Wifi credentials
  * Adjust the location according to Wunderground API, e.g. Zurich, CH
  * Adjust UTC offset
 
-## Known issues
-Many people asked me to finally publish the new version. I'm doing that now, knowing that some things are not perfect or stable enough. If you detect or even fix one of these issues, please contact me or create a pull request
-* Time is running out of sync. Sometimes off my many minutes. I assume it has something todo with the implementation of the millis() function which I based the time sync upon
-* The precipitation value from Wunderground currently always returns 0.0mm for my location. Maybe this looks better in other locations
-* Sometimes the WeatherStation crashes. I didn't have time to debug this behavior. If you have any clue, please let me know.
+## Setup for PlatformIO
+
+If you are using the PlatformIO environment for building
+ * choose one of the available IDE integration or the Atom based IDE
+ * install libraries 561, 562 and 563 with "platformio lib install"
+ * adapt the WeatherStationDemo.ino file to your needs (see details above)
+
+
+## Upgrade
+
+The ESP8266 Oled Library changed a lot with the latest release of version 3.0.0. We fixed many bugs and improved performance and changed the API a little bit. This means that you might have to adapt your Weather Station Code if you created it using the older 2.x.x version of the library. Either compare your code to the updated WeatherStationDemo or read through the Upgrade Guide here: [Upgrade Guide](https://github.com/squix78/esp8266-oled-ssd1306/blob/master/UPGRADE-3.0.md)
+
+## Available Modules
+* **TimeClient**: simple class which uses the header date and time to set the clock
+* **NTPClient**: a NTP based time class written by Fabrice Weinberg
+* **WundergroundClient**: fetches current weather and forecast from wunderground.com
+* **ThingspeakClient**: fetches data from Thingspeak which you might have collected with another sensor node and posted there. I use this to measure outdoor temperature and humidity and show it on the WeatherStation with a ClimateNode: https://shop.squix.ch/index.php/esp8266/climatenode.html  
+
+## Why Weather Station as a library?
+
+I realized that more and more the Weather Station was becoming a general framework for displaying data over WiFi to one of these pretty displays. But everyone would have different ways or sources for data and having the important part of the library would rather be the classes which fetch the data then the main class.
+So if you write data fetchers which might be of interest to others please contact me to integrate them here or offer your code as extension library yourself and call it something like esp8266-weather-station-<yourservice>.
+I will gladly list it here as third party library...

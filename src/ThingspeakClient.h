@@ -27,66 +27,30 @@ See more at http://blog.squix.ch
 
 #include <JsonListener.h>
 #include <JsonStreamingParser.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 
 #define MAX_FORECAST_PERIODS 7
 
-class WundergroundClient: public JsonListener {
+class ThingspeakClient: public JsonListener {
   private:
-    String currentKey;
-    String currentParent = "";
-    long localEpoc = 0;
-    int gmtOffset = 1;
-    long localMillisAtUpdate;
-    String date = "-";
-    boolean isMetric = true;
-    String currentTemp;
-    String weatherIcon;
-    String weatherText;
-    String humidity;
-    String pressure;
-    String precipitationToday;
-    void doUpdate(String url);
-
-    // forecast
-    boolean isForecast = false;
-    boolean isSimpleForecast = true;
-    int currentForecastPeriod;
-    String forecastIcon [MAX_FORECAST_PERIODS];
-    String forecastTitle [MAX_FORECAST_PERIODS];
-    String forecastLowTemp [MAX_FORECAST_PERIODS];
-    String forecastHighTemp [MAX_FORECAST_PERIODS];
+    // Thingspeak has a maximum of 8 fields
+    String lastFields[8];
+    String fieldLabels[8];
+    String createdAt;
+    boolean isHeader = true;
+    String currentKey = "";
     
   public:
-    WundergroundClient(boolean isMetric);
-    void updateConditions(String apiKey, String country, String city);
-    void updateForecast(String apiKey, String country, String city);
-    String getHours();
-    String getMinutes();
-    String getSeconds();
-    String getDate();
-    long getCurrentEpoch();
+    ThingspeakClient();
+    
+    void getLastChannelItem(String channelId, String readApiKey);
 
-    String getCurrentTemp();
+    String getFieldLabel(int index);
 
-    String getTodayIcon();
+    String getFieldValue(int index);
 
-    String getMeteoconIcon(String iconText);
-
-    String getWeatherText();
-
-    String getHumidity();
-
-    String getPressure();
-
-    String getPrecipitationToday();
-
-    String getForecastIcon(int period);
-
-    String getForecastTitle(int period);
-
-    String getForecastLowTemp(int period);
-
-    String getForecastHighTemp(int period);
+    String getCreatedAt();
     
     virtual void whitespace(char c);
   

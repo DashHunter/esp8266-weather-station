@@ -25,7 +25,7 @@ See more at http://blog.squix.ch
 
 #include "TimeClient.h"
 
-TimeClient::TimeClient(int utcOffset) {
+TimeClient::TimeClient(float utcOffset) {
   myUtcOffset = utcOffset;
 }
 
@@ -41,8 +41,11 @@ void TimeClient::updateTime() {
   client.print(String("GET / HTTP/1.1\r\n") +
                String("Host: www.google.com\r\n") + 
                String("Connection: close\r\n\r\n"));
-  while(!client.available()) {
+  int repeatCounter = 0;
+  while(!client.available() && repeatCounter < 10) {
     delay(1000); 
+    Serial.println(".");
+    repeatCounter++;
   }
 
   String line;
@@ -60,8 +63,11 @@ void TimeClient::updateTime() {
         int parsedHours = line.substring(23, 25).toInt();
         int parsedMinutes = line.substring(26, 28).toInt();
         int parsedSeconds = line.substring(29, 31).toInt();
+        Serial.println(String(parsedHours) + ":" + String(parsedMinutes) + ":" + String(parsedSeconds));
 
         localEpoc = (parsedHours * 60 * 60 + parsedMinutes * 60 + parsedSeconds);
+        Serial.println(localEpoc);
+        localMillisAtUpdate = millis();
       }
     }
   }
@@ -72,7 +78,7 @@ String TimeClient::getHours() {
     if (localEpoc == 0) {
       return "--";
     }
-    int hours = (getCurrentEpoch()  % 86400L) / 3600 + myUtcOffset;
+    int hours = ((getCurrentEpochWithUtcOffset()  % 86400L) / 3600) % 24;
     if (hours < 10) {
       return "0" + String(hours);
     }
@@ -83,7 +89,7 @@ String TimeClient::getMinutes() {
     if (localEpoc == 0) {
       return "--";
     }
-    int minutes = ((getCurrentEpoch() % 3600) / 60);
+    int minutes = ((getCurrentEpochWithUtcOffset() % 3600) / 60);
     if (minutes < 10 ) {
       // In the first 10 minutes of each hour, we'll want a leading '0'
       return "0" + String(minutes);
@@ -94,7 +100,7 @@ String TimeClient::getSeconds() {
     if (localEpoc == 0) {
       return "--";
     }
-    int seconds = getCurrentEpoch() % 60;
+    int seconds = getCurrentEpochWithUtcOffset() % 60;
     if ( seconds < 10 ) {
       // In the first 10 seconds of each minute, we'll want a leading '0'
       return "0" + String(seconds);
@@ -109,4 +115,9 @@ String TimeClient::getFormattedTime() {
 long TimeClient::getCurrentEpoch() {
   return localEpoc + ((millis() - localMillisAtUpdate) / 1000);
 }
+
+long TimeClient::getCurrentEpochWithUtcOffset() {
+  return round(getCurrentEpoch() + 3600 * myUtcOffset + 86400L) % 86400L;
+}
+
 
